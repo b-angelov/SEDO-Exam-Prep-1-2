@@ -1,4 +1,4 @@
-piepline{
+Piepline{
     agent any
 
     stages{
