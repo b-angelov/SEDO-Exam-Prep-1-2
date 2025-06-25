@@ -1,5 +1,7 @@
 name: SEDO-Exam-Prep-1-2
 
+# test on develop
+
 on:
   push:
     branches:
@@ -7,7 +9,7 @@ on:
         - "feature/**"
 
 jobs:
-  build:
+  build-and-test:
 
     runs-on: ubuntu-latest
 
