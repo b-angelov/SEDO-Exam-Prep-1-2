@@ -17,12 +17,39 @@ pipeline{
                     checkout scm
                 }
                 }
-                stage("Set up Dotnet"){
-                    steps{
-                        bat 'dotnet --version'
-                        bat 'winget install Microsoft.DotNet.SDK.6 --source winget'
-                    }
-                }
+
+                    stage('Check & Install .NET 6') {
+                        steps {
+                            powershell '''
+                            $dotnet = Get-Command dotnet -ErrorAction SilentlyContinue
+
+                            if (-not $dotnet) {
+                                Write-Output "❌ .NET CLI not found. Installing..."
+                            } else {
+                                $sdks = & dotnet --list-sdks
+                                if ($sdks -match "^6\\.0\\.") {
+                                Write-Output "✅ .NET 6.0 SDK already installed."
+                                return
+                                } else {
+                                Write-Output "❌ .NET 6.0 SDK not found. Installing..."
+                                }
+                            }
+
+                            # Download and install .NET 6.0
+                            $url = "https://dot.net/v1/dotnet-install.ps1"
+                            $script = "dotnet-install.ps1"
+                            Invoke-WebRequest $url -OutFile $script
+                            .\\$script -Version 6.0.416 -InstallDir "C:\\dotnet"
+
+                            # Add to PATH for current session
+                            $env:PATH = "C:\\dotnet;" + $env:PATH
+
+                            # Confirm
+                            & C:\\dotnet\\dotnet --version
+                            '''
+                        }
+                        }
+
 
                 stage("Build Solution"){
                     steps{
